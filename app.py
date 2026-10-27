@@ -218,7 +218,7 @@ if "last_refresh" in st.session_state:
         f"{r['kept']} fit your location rules, **{len(r['new_jobs'])} new**."
     )
     for w in r["warnings"]:
-        st.warning(w)
+        (st.info if w.startswith("Tip:") else st.warning)(w)
 
 # --- The job lists ---
 jobs = [j for j in load_jobs(conn) if passes_filters(j, work_types, hybrid_max, onsite_max, sources)]

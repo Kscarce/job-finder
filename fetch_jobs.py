@@ -22,7 +22,8 @@ def fetch_all(conn):
 
     for source in SOURCES:
         if not source.is_configured():
-            warnings.append(f"{source.NAME}: no API key in keys/.env, skipped.")
+            warnings.append(f"Tip: add a free {source.NAME} API key in ⚙️ Settings to get more jobs "
+                            f"({'Indeed, LinkedIn, Glassdoor and more' if source.NAME == 'jsearch' else 'federal government jobs'}).")
             continue
 
         # Sources that download everything at once (company job boards).
