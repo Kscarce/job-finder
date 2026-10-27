@@ -1,0 +1,16 @@
+# Your API keys. Never share or upload these.
+keys/.env
+.env
+
+# Your local job database and resumes
+data/
+resume/*
+!resume/README.txt
+
+# Local tool settings
+.claude/
+
+# Python clutter
+.venv/
+__pycache__/
+*.pyc

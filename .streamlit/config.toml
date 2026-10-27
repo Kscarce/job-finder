@@ -1,0 +1,12 @@
+[server]
+# Don't ask for an email address on first run; open-app.bat opens the browser instead.
+headless = true
+# Only reachable from this computer, not from other devices on your network.
+address = "localhost"
+
+[client]
+# Hide the "Deploy" button; this app only runs on your computer.
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false

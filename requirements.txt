@@ -1,0 +1,14 @@
+# Needs Python 3.13 (PyTorch doesn't support 3.15 yet).
+
+# Step 1: pulling listings
+requests
+python-dotenv
+
+# Step 2: reading resumes and scoring jobs
+python-docx
+pypdf
+sentence-transformers
+scikit-learn
+
+# Step 3: the web app
+streamlit
