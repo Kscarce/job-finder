@@ -69,6 +69,9 @@ def print_ranked(conn, sort="apply", limit=25):
 
 
 if __name__ == "__main__":
+    import config
+    if not config.IS_SET_UP:
+        raise SystemExit("Not set up yet: open the app (open-app.bat) and fill in the setup screen first.")
     sort = sys.argv[1] if len(sys.argv) > 1 else "apply"
     limit = int(sys.argv[2]) if len(sys.argv) > 2 else 25
     conn = db.connect()

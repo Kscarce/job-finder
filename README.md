@@ -48,24 +48,33 @@ I built it during my own job search as a new data science grad.
 
 The rules are at the top of `scoring.py`, and they're meant to be edited for your own profile.
 
-## Setup
+## Install
 
-Needs **Python 3.13** (PyTorch, used by the embedding model, doesn't support 3.15 yet). On Windows you may also need the current [Microsoft Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe).
+You need **Python 3.11, 3.12 or 3.13** ([download 3.13](https://www.python.org/downloads/)). Newer versions don't work yet because PyTorch, used by the AI model, doesn't support them.
 
-1. Create a virtual environment and install the requirements:
-   ```
-   py -V:3.13 -m venv .venv
-   .venv\Scripts\python.exe -m pip install -r requirements.txt
-   ```
-2. Copy `keys\.env.example` to `keys\.env` and add your free API keys:
-   - **JSearch:** subscribe to the free "Basic" plan at https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch and copy your `X-RapidAPI-Key`.
-   - **USAJobs:** request a key at https://developer.usajobs.gov/apirequest/.
+1. **Download this project:** click the green **Code** button above, then **Download ZIP**, and unzip it somewhere like your Documents folder.
+2. **Install:**
+   - **Windows:** double-click **`install.bat`**. If it says so at the end, also install Microsoft's free [Visual C++ runtime](https://aka.ms/vs/17/release/vc_redist.x64.exe).
+   - **Mac/Linux:** open a terminal in the folder and run `bash install.sh`.
 
-   Both are optional: the company job boards work with no keys at all.
-3. Put your resume(s) in the `resume\` folder (.docx, .pdf or .txt).
-4. Open `config.py` and set your location, distance limits and target job titles. It's set up for Danville, VA as an example.
+   It takes about 5–10 minutes (it downloads about 1 GB, mostly PyTorch).
+3. **Start it:**
+   - **Windows:** double-click **`open-app.bat`**.
+   - **Mac/Linux:** run `./open-app.sh`.
 
-The first scoring run downloads the embedding model (~90 MB) once.
+   Your browser opens to the app at http://localhost:8501. Keep the terminal window open while you use it.
+4. **Fill in the setup screen** the first time it opens: your resume, your city, how far you'll travel, the job titles you want, and optional API keys. Then hit **🔄 Refresh**. The first search takes a few extra minutes while the AI model (~90 MB) downloads.
+
+You can change any of it later from **⚙️ Settings** in the sidebar.
+
+### Free API keys (optional)
+
+Without keys you still get jobs from about 50 tech company career pages. Adding keys gets you much more:
+
+- **JSearch** (Indeed, LinkedIn, Glassdoor and more): subscribe to the free "Basic" plan at https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch and copy your `X-RapidAPI-Key`. It allows 200 requests a month, and the app keeps count for you.
+- **USAJobs** (federal jobs): request a free key at https://developer.usajobs.gov/apirequest/.
+
+Paste them into the setup screen. They're saved in `keys/.env` on your computer.
 
 ## Using it
 
@@ -95,18 +104,16 @@ Or from a terminal in the project folder:
 
 ## Configuration
 
-Everything you're likely to change is in `config.py`:
+Your personal settings (city, distances, job titles, extra background) are set in the app and saved in `my_settings.json`. City distances are worked out with OpenStreetMap's free [Nominatim](https://nominatim.org/) service and cached in `data/geocache.json`, so it works anywhere in the US.
+
+For more control, `config.py` has the shared settings:
 
 | Setting | What it does |
 |---------|--------------|
-| `HOME_CITY`, `HOME_LAT`, `HOME_LON` | Your location |
-| `HYBRID_MAX_MILES`, `ONSITE_MAX_MILES` | How far you'll go for hybrid and on-site jobs (straight-line miles) |
-| `TARGET_TITLES` | Job titles to search for |
 | `COMPANY_BOARDS` | Companies to check. Add one by finding its careers page: `job-boards.greenhouse.io/NAME`, `jobs.lever.co/NAME` or `jobs.ashbyhq.com/NAME` |
-| `NEARBY_CITIES` | Office cities near you, so company-board jobs get a distance |
-| `BLOCKED_SITES`, `BLOCKED_COMPANIES`, `BLOCKED_TITLE_WORDS` | Your blocklist |
+| `BLOCKED_SITES`, `BLOCKED_COMPANIES`, `BLOCKED_TITLE_WORDS` | The blocklist |
 | `EXCLUDE_HOURLY_PAY`, `EXCLUDE_PLACEMENT_PROGRAMS` | Turn those filters on or off |
-| `EXTRA_BACKGROUND` | Experience that isn't on your resume but should count |
+| `BOARDS_SKIP_SENIOR` | Skip Senior/Staff/Principal roles from company boards |
 | `PIECE_WEIGHTS`, `FIT_WEIGHT` | How the scores are weighted |
 | `JSEARCH_MONTHLY_LIMIT`, `JSEARCH_RESERVE` | Request budget |
 
@@ -117,7 +124,10 @@ Microsoft, Apple, Google, Amazon and Meta use their own hiring systems with no f
 | File | What it does |
 |------|--------------|
 | `app.py` | The Streamlit web app |
-| `config.py` | All your settings |
+| `settings_page.py` | The setup / settings screen |
+| `config.py` | Shared settings, and loads your personal ones from `my_settings.json` |
+| `geocode.py` | Looks up any US city's location (OpenStreetMap), with a cache |
+| `install.bat`, `install.sh` | One-step installers for Windows and Mac/Linux |
 | `fetch_jobs.py` | Pulls jobs from every source, filters and saves them |
 | `score_jobs.py` | Scores every job and prints them ranked |
 | `scoring.py` | How fit, pay and Apply First are worked out |
@@ -130,7 +140,7 @@ Microsoft, Apple, Google, Amazon and Meta use their own hiring systems with no f
 | `db.py` | The local SQLite database |
 | `sources/` | One file per job source: `jsearch.py`, `usajobs.py`, `company_boards.py` |
 
-Your keys (`keys/.env`), resumes (`resume/`) and job database (`data/`) stay on your computer and are excluded from Git.
+Your settings (`my_settings.json`), keys (`keys/.env`), resumes (`resume/`) and job database (`data/`) stay on your computer and are excluded from Git.
 
 ## Built with
 

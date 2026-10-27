@@ -105,6 +105,8 @@ def refresh(conn):
 
 
 def main():
+    if not config.IS_SET_UP:
+        raise SystemExit("Not set up yet: open the app (open-app.bat) and fill in the setup screen first.")
     conn = db.connect()
 
     print("Before this run:")

@@ -17,8 +17,9 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 
 import config
+import geocode
 import location
-from scoring import SENIOR, TARGET_WORDS, normalize_title, title_matches_target
+from scoring import SENIOR, normalize_title, target_words, title_matches_target
 
 NAME = "company"
 
@@ -89,11 +90,21 @@ def _place(location_text, remote_flag=False, workplace=""):
         return None
     if remote:
         return "remote", None, ""
-    for city, (lat, lon) in config.NEARBY_CITIES.items():
-        if city in loc.lower():
-            wt = "hybrid" if workplace.lower() == "hybrid" else "on-site"
-            return wt, location.miles_from_home(lat, lon), city.title()
-    return None  # an office outside your area
+    # Office jobs: look up each listed city and use the one closest to home.
+    best = None
+    for part in re.split(r";|\||/|\bor\b", loc):
+        part = re.sub(r",?\s*(united states|usa|us)\.?$", "", part.strip(), flags=re.IGNORECASE)
+        if not part or FOREIGN.search(part):
+            continue
+        spot = geocode.lookup(part)
+        if spot:
+            miles = location.miles_from_home(spot["lat"], spot["lon"])
+            if best is None or miles < best[0]:
+                best = (miles, part.split(",")[0].strip())
+    if best is None or best[0] > config.SEARCH_RADIUS_MILES:
+        return None  # an office outside your area
+    wt = "hybrid" if workplace.lower() == "hybrid" else "on-site"
+    return wt, best[0], best[1]
 
 
 def _job(company_key, raw_id, title, company, loc_text, place, description, url,
@@ -123,7 +134,7 @@ def _job(company_key, raw_id, title, company, loc_text, place, description, url,
         "apply_options": None,
         "posted_at": posted,
         # Which of your target titles it matched (used to compare pay with similar jobs).
-        "search_title": next((t for t, words in zip(config.TARGET_TITLES, TARGET_WORDS)
+        "search_title": next((t for t, words in zip(config.TARGET_TITLES, target_words())
                               if words <= normalize_title(title)), "company board"),
     }
 

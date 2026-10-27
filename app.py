@@ -17,6 +17,7 @@ import config
 import db
 import fetch_jobs
 import score_jobs
+import settings_page
 import usage
 from fetch_jobs import format_salary
 
@@ -148,6 +149,15 @@ conn = db.connect()
 
 st.title("💼 Job Finder")
 
+# First time (or "Settings" clicked): show the setup screen instead of the jobs.
+if not config.IS_SET_UP or st.session_state.get("show_settings"):
+    settings_page.show()
+    st.stop()
+
+if st.session_state.pop("just_set_up", False):
+    st.success("You're all set! Hit **🔄 Refresh** to find your first jobs. "
+               "The first search takes a few minutes while it downloads the AI model.")
+
 # --- Request budget (sidebar) ---
 with st.sidebar:
     st.subheader("JSearch requests")
@@ -165,16 +175,19 @@ with st.sidebar:
     st.caption(
         f"Home: {config.HOME_CITY}  \n"
         f"Hybrid jobs are searched within {config.HYBRID_MAX_MILES} mi, "
-        f"on-site within {config.ONSITE_MAX_MILES} mi, remote anywhere in the US. "
-        "Change these in config.py."
+        f"on-site within {config.ONSITE_MAX_MILES} mi, remote anywhere in the US."
     )
+    if st.button("⚙️ Settings", use_container_width=True):
+        st.session_state["show_settings"] = True
+        st.rerun()
 
 # --- Filters and Refresh (top of page) ---
 c1, c2, c3 = st.columns([3, 1, 1])
 work_types = c1.multiselect("Work type", ["remote", "hybrid", "on-site"],
                             default=["remote", "hybrid", "on-site"])
-hybrid_options = [m for m in (25, 50, 75) if m <= config.HYBRID_MAX_MILES] or [config.HYBRID_MAX_MILES]
-onsite_options = [m for m in (25, 40) if m <= config.ONSITE_MAX_MILES] or [config.ONSITE_MAX_MILES]
+# Narrowing options, up to the limits in your settings.
+hybrid_options = sorted({m for m in (10, 25, 50, 75, 100) if m < config.HYBRID_MAX_MILES} | {config.HYBRID_MAX_MILES})
+onsite_options = sorted({m for m in (10, 25, 40, 50) if m < config.ONSITE_MAX_MILES} | {config.ONSITE_MAX_MILES})
 hybrid_max = c2.selectbox("Hybrid within", hybrid_options, index=len(hybrid_options) - 1,
                           format_func=lambda m: f"{m} miles")
 onsite_max = c3.selectbox("On-site within", onsite_options, index=len(onsite_options) - 1,

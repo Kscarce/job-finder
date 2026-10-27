@@ -2,6 +2,9 @@
 keys/.env
 .env
 
+# Your personal settings (location, job titles, background)
+my_settings.json
+
 # Your local job database and resumes
 data/
 resume/*

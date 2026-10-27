@@ -42,7 +42,7 @@ def fetch(title, conn):
     """Two searches per title: around home, and remote jobs anywhere."""
     local = _call(conn, {
         "Keyword": title,
-        "LocationName": config.HOME_CITY_LONG,
+        "LocationName": config.HOME_CITY,
         "Radius": config.SEARCH_RADIUS_MILES,  # USAJobs uses miles
         "ResultsPerPage": 100,
     })

@@ -110,13 +110,15 @@ def normalize_title(title):
     return set(re.findall(r"[a-z]+", t))
 
 
-TARGET_WORDS = [normalize_title(t) for t in config.TARGET_TITLES]
+def target_words():
+    """Your target titles as word sets (read fresh, so changed settings apply at once)."""
+    return [normalize_title(t) for t in config.TARGET_TITLES]
 
 
 def title_matches_target(title):
     """True if the title contains every word of one of your target titles."""
     words = normalize_title(title)
-    return any(target <= words for target in TARGET_WORDS)
+    return any(target <= words for target in target_words())
 
 
 def apply_rules(title, description, min_yearly_pay=None):
@@ -273,6 +275,12 @@ def score_jobs(jobs):
     for name, extra in config.EXTRA_BACKGROUND.items():
         pieces[name] = (pieces.get(name, "") + "\n" + extra).strip()
 
+    # Not every resume has every piece (e.g. no dissertation). Skip empty
+    # pieces and share their weight among the rest.
+    pieces = {name: text for name, text in pieces.items() if text.strip()}
+    total = sum(config.PIECE_WEIGHTS.get(name, 0) for name in pieces) or 1
+    weights = {name: config.PIECE_WEIGHTS.get(name, 0) / total for name in pieces}
+
     model = load_model()
     tfidf = tfidf_scores(jobs, resumes)
 
@@ -296,7 +304,7 @@ def score_jobs(jobs):
 
             # Each piece of your background vs the best-matching part of the job.
             piece_sim = sum(
-                config.PIECE_WEIGHTS[name] * float((job_chunks @ v).max())
+                weights[name] * float((job_chunks @ v).max())
                 for name, v in piece_vecs.items()
             )
             semantic = similarity_to_points(0.5 * by_resume[best_resume] + 0.5 * piece_sim)

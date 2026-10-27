@@ -1,7 +1,15 @@
 """
-All the settings you're likely to want to change live in this one file.
+Settings for the job finder.
+
+YOUR personal settings (location, distances, job titles, extra background)
+are saved in my_settings.json by the setup screen in the app, and stay on
+your computer (the file is excluded from Git). Change them any time from
+"Settings" in the app's sidebar.
+
+Everything below the personal section is shared settings you can also edit.
 """
 
+import json
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -12,23 +20,46 @@ KEYS_FILE = PROJECT_DIR / "keys" / ".env"   # your API keys
 DATA_DIR = PROJECT_DIR / "data"             # the SQLite database goes here
 DB_FILE = DATA_DIR / "jobs.db"
 RESUME_DIR = PROJECT_DIR / "resume"         # put your resume files here (.docx, .pdf or .txt)
+SETTINGS_FILE = PROJECT_DIR / "my_settings.json"
 
 # ---------------------------------------------------------------------------
-# Your location
+# Your personal settings (from my_settings.json)
 # ---------------------------------------------------------------------------
-HOME_CITY = "Danville, VA"
-HOME_CITY_LONG = "Danville, Virginia"       # USAJobs prefers the full state name
-HOME_LAT = 36.5860
-HOME_LON = -79.3950
+DEFAULT_SETTINGS = {
+    "home_city": "",            # e.g. "Austin, TX"
+    "home_lat": None,           # filled in automatically from home_city
+    "home_lon": None,
+    # remote  -> anywhere in the US
+    # hybrid  -> within hybrid_max_miles of home
+    # on-site -> within onsite_max_miles of home (a daily commute)
+    "hybrid_max_miles": 50,
+    "onsite_max_miles": 30,
+    "target_titles": ["Data Analyst", "Data Scientist"],
+    # Experience that isn't on your resume but should count when scoring.
+    "extra_background": "",
+}
 
-# ---------------------------------------------------------------------------
-# Which jobs to keep, by work type
-#   remote  -> anywhere in the US
-#   hybrid  -> within HYBRID_MAX_MILES of home
-#   on-site -> within ONSITE_MAX_MILES of home (a daily commute)
-# ---------------------------------------------------------------------------
-HYBRID_MAX_MILES = 75
-ONSITE_MAX_MILES = 40
+
+def load_settings():
+    settings = dict(DEFAULT_SETTINGS)
+    if SETTINGS_FILE.exists():
+        settings.update(json.loads(SETTINGS_FILE.read_text(encoding="utf-8")))
+    return settings
+
+
+def save_settings(settings):
+    SETTINGS_FILE.write_text(json.dumps(settings, indent=2), encoding="utf-8")
+
+
+_s = load_settings()
+IS_SET_UP = SETTINGS_FILE.exists() and bool(_s["home_city"]) and _s["home_lat"] is not None
+
+HOME_CITY = _s["home_city"]
+HOME_LAT = _s["home_lat"]
+HOME_LON = _s["home_lon"]
+HYBRID_MAX_MILES = _s["hybrid_max_miles"]
+ONSITE_MAX_MILES = _s["onsite_max_miles"]
+TARGET_TITLES = _s["target_titles"]
 
 # Some hybrid/on-site listings only give a state ("Virginia"), so we can't tell
 # how far away they are. False = drop them. True = keep them, marked "distance unknown".
@@ -38,22 +69,6 @@ KEEP_UNKNOWN_DISTANCE = False
 SEARCH_RADIUS_MILES = max(HYBRID_MAX_MILES, ONSITE_MAX_MILES)
 
 # ---------------------------------------------------------------------------
-# Job titles to search for
-# ---------------------------------------------------------------------------
-TARGET_TITLES = [
-    "Data Scientist",
-    "Business Intelligence Analyst",
-    "Technical Consultant",
-    "AI Engineer",
-    "Machine Learning Engineer",
-    "Data Analyst",
-    "BI Developer",
-    "Applied Scientist",
-    "Information Security Analyst",
-    "Security Analyst",
-]
-
-# ---------------------------------------------------------------------------
 # Scoring
 # ---------------------------------------------------------------------------
 
@@ -61,12 +76,9 @@ TARGET_TITLES = [
 # then runs on your computer with no internet needed.
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-# Background that isn't on your resumes but should count. Added to the
-# matching piece of your background when scoring.
-EXTRA_BACKGROUND = {
-    "leadership": "Ran my own volleyball lessons, coaching players one-on-one and in groups, "
-                  "showing leadership and initiative.",
-}
+# Background that isn't on your resumes but should count (from your settings).
+# It's added to the leadership & experience piece of your background when scoring.
+EXTRA_BACKGROUND = {"leadership": _s["extra_background"]} if _s["extra_background"] else {}
 
 # How much each piece of your background counts toward the fit score (adds up to 1).
 PIECE_WEIGHTS = {
@@ -159,17 +171,6 @@ COMPANY_BOARDS = {
 
 # Skip senior roles from company boards (they're mostly Senior/Staff/Principal).
 BOARDS_SKIP_SENIOR = True
-
-# Office cities near home, so hybrid/on-site board jobs get a distance.
-# (Board listings give a city name but no map coordinates.)
-NEARBY_CITIES = {
-    "raleigh": (35.7796, -78.6382), "durham": (35.9940, -78.8986),
-    "chapel hill": (35.9132, -79.0558), "research triangle": (35.8992, -78.8636),
-    "morrisville": (35.8235, -78.8256), "cary": (35.7915, -78.7811),
-    "greensboro": (36.0726, -79.7920), "winston-salem": (36.0999, -80.2442),
-    "burlington": (36.0957, -79.4378), "roanoke": (37.2710, -79.9414),
-    "lynchburg": (37.4138, -79.1422), "danville": (36.5860, -79.3950),
-}
 
 # ---------------------------------------------------------------------------
 # JSearch request budget
