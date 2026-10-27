@@ -4,8 +4,8 @@ job-details endpoint. Each job costs 1 JSearch request, so it only checks your
 best-ranked jobs, and never dips into your request reserve.
 
 Run it with:
-    python find_company_links.py        (checks your top 10 jobs)
-    python find_company_links.py 20     (checks your top 20)
+    python jobfinder/find_company_links.py        (checks your top 10 jobs)
+    python jobfinder/find_company_links.py 20     (checks your top 20)
 """
 
 import os

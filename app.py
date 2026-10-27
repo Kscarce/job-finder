@@ -1,18 +1,25 @@
 r"""
-STEP 3: The web app. Shows your jobs ranked, lets you filter them, refresh
+The Job Finder web app. Shows your jobs ranked, lets you filter them, refresh
 for new listings, and mark jobs as saved, applied, or skipped.
 
 Start it by double-clicking open-app.bat, or run:
     .venv\Scripts\python.exe -m streamlit run app.py
+
+The rest of the code lives in the jobfinder/ folder.
 """
 
 import json
 import re
+import sys
+from pathlib import Path
 from urllib.parse import urlparse
 
 import streamlit as st
 
-import apply_links
+# Let this file use the code in jobfinder/ (config, scoring, sources...).
+sys.path.insert(0, str(Path(__file__).parent / "jobfinder"))
+
+import apply_links  # noqa: E402  (these imports need the line above first)
 import config
 import db
 import fetch_jobs

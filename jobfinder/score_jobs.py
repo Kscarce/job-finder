@@ -2,10 +2,10 @@
 STEP 2: Score every saved job against your resumes and print them ranked.
 
 Run it with:
-    python score_jobs.py              (ranked by Apply First)
-    python score_jobs.py fit          (ranked by fit)
-    python score_jobs.py pay          (ranked by pay)
-    python score_jobs.py apply 50     (show the top 50 instead of 25)
+    python jobfinder/score_jobs.py              (ranked by Apply First)
+    python jobfinder/score_jobs.py fit          (ranked by fit)
+    python jobfinder/score_jobs.py pay          (ranked by pay)
+    python jobfinder/score_jobs.py apply 50     (show the top 50 instead of 25)
 """
 
 import sys

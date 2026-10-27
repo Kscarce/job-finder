@@ -3,7 +3,7 @@ Reads your resumes from the resume/ folder and pulls out the text.
 Works with .docx, .pdf and .txt files.
 
 Run it on its own to check the text came out right:
-    python resume_reader.py
+    python jobfinder/resume_reader.py
 """
 
 from pathlib import Path

@@ -3,7 +3,7 @@ STEP 1: Pull job listings from every source, apply your location rules,
 remove duplicates, save them to the database, and print the new ones.
 
 Run it with:
-    python fetch_jobs.py
+    python jobfinder/fetch_jobs.py
 """
 
 from dotenv import load_dotenv

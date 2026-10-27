@@ -46,7 +46,7 @@ I built it during my own job search as a new data science grad.
 3. **TF-IDF word matching** is a small tie-breaker, and the backup if the AI model can't load.
 4. **Pay score** compares a job's salary to the typical salary for the same title (50 = typical). **Apply First** = 75% fit + 25% pay, and jobs with no salary listed count as typical so they aren't punished.
 
-The rules are at the top of `scoring.py`, and they're meant to be edited for your own profile.
+The rules are at the top of `jobfinder/scoring.py`, and they're meant to be edited for your own profile.
 
 ## Install
 
@@ -81,18 +81,21 @@ Paste them into the setup screen. They're saved in `keys/.env` on your computer.
 On Windows, double-click:
 
 - **`open-app.bat`**: opens the app in your browser (http://localhost:8501). Keep the black window open while you use it.
-- **`find-jobs.bat`**: searches for new jobs and ranks them, without the app.
-- **`rank-jobs.bat`**: re-scores the jobs you already have (no API requests), e.g. after changing your resume or settings.
-- **`check-usage.bat`**: shows how many JSearch requests you have left this month.
+
+Extra shortcuts in the `tools` folder, if you'd rather skip the app:
+
+- **`tools\find-jobs.bat`**: searches for new jobs and ranks them.
+- **`tools\rank-jobs.bat`**: re-scores the jobs you already have (no API requests), e.g. after changing your resume or settings.
+- **`tools\check-usage.bat`**: shows how many JSearch requests you have left this month.
 
 Or from a terminal in the project folder:
 
 ```
-.venv\Scripts\python.exe -m streamlit run app.py   # the app
-.venv\Scripts\python.exe fetch_jobs.py             # find new jobs
-.venv\Scripts\python.exe score_jobs.py             # score and rank (or: score_jobs.py fit / pay)
-.venv\Scripts\python.exe resume_reader.py          # check how your resumes were read
-.venv\Scripts\python.exe usage.py                  # JSearch request budget
+.venv\Scripts\python.exe -m streamlit run app.py          # the app
+.venv\Scripts\python.exe jobfinder\fetch_jobs.py          # find new jobs
+.venv\Scripts\python.exe jobfinder\score_jobs.py          # score and rank (or: score_jobs.py fit / pay)
+.venv\Scripts\python.exe jobfinder\resume_reader.py       # check how your resumes were read
+.venv\Scripts\python.exe jobfinder\usage.py               # JSearch request budget
 ```
 
 ### In the app
@@ -106,7 +109,7 @@ Or from a terminal in the project folder:
 
 Your personal settings (city, distances, job titles, extra background) are set in the app and saved in `my_settings.json`. City distances are worked out with OpenStreetMap's free [Nominatim](https://nominatim.org/) service and cached in `data/geocache.json`, so it works anywhere in the US.
 
-For more control, `config.py` has the shared settings:
+For more control, `jobfinder/config.py` has the shared settings:
 
 | Setting | What it does |
 |---------|--------------|
@@ -121,24 +124,36 @@ Microsoft, Apple, Google, Amazon and Meta use their own hiring systems with no f
 
 ## Project structure
 
+```
+job-finder/
+├── install.bat / install.sh     One-step installers (Windows / Mac & Linux)
+├── open-app.bat / open-app.sh   Start the app
+├── app.py                       The Streamlit web app
+├── tools/                       Optional shortcuts: search, re-rank, check API usage
+├── jobfinder/                   All the code behind the app (see below)
+├── docs/                        Screenshot
+├── keys/                        Your API keys go here (private)
+└── resume/                      Your resumes go here (private)
+```
+
+Inside `jobfinder/`:
+
 | File | What it does |
 |------|--------------|
-| `app.py` | The Streamlit web app |
-| `settings_page.py` | The setup / settings screen |
 | `config.py` | Shared settings, and loads your personal ones from `my_settings.json` |
-| `geocode.py` | Looks up any US city's location (OpenStreetMap), with a cache |
-| `install.bat`, `install.sh` | One-step installers for Windows and Mac/Linux |
+| `settings_page.py` | The setup / settings screen |
 | `fetch_jobs.py` | Pulls jobs from every source, filters and saves them |
-| `score_jobs.py` | Scores every job and prints them ranked |
+| `sources/` | One file per job source: `jsearch.py`, `usajobs.py`, `company_boards.py` |
 | `scoring.py` | How fit, pay and Apply First are worked out |
+| `score_jobs.py` | Scores every job and prints them ranked |
 | `resume_reader.py` | Reads your resumes and splits them into background pieces |
 | `blocklist.py` | Drops spam sites, unwanted companies, placement programs and hourly pay |
 | `apply_links.py` | Picks the company's own posting out of the sites a job is listed on |
 | `find_company_links.py` | Looks up company links for jobs you already have (1 JSearch request each) |
 | `location.py` | Distance, remote/hybrid/on-site detection, location rules |
+| `geocode.py` | Looks up any US city's location (OpenStreetMap), with a cache |
 | `usage.py` | Tracks API requests so you don't run out |
 | `db.py` | The local SQLite database |
-| `sources/` | One file per job source: `jsearch.py`, `usajobs.py`, `company_boards.py` |
 
 Your settings (`my_settings.json`), keys (`keys/.env`), resumes (`resume/`) and job database (`data/`) stay on your computer and are excluded from Git.
 

@@ -8,7 +8,7 @@ Two numbers are tracked:
      This one is the most accurate, so we trust it whenever we have it.
 
 Run this file on its own to see where you stand:
-    python usage.py
+    python jobfinder/usage.py
 """
 
 from datetime import datetime, timedelta, timezone

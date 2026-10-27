@@ -15,7 +15,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Where things are stored
 # ---------------------------------------------------------------------------
-PROJECT_DIR = Path(__file__).parent
+PROJECT_DIR = Path(__file__).parent.parent   # the main project folder (this file is in jobfinder/)
 KEYS_FILE = PROJECT_DIR / "keys" / ".env"   # your API keys
 DATA_DIR = PROJECT_DIR / "data"             # the SQLite database goes here
 DB_FILE = DATA_DIR / "jobs.db"
